@@ -23,7 +23,7 @@ userRouter.post("/signup", async (c) => {
   const { success } = signupInput.safeParse(body);
   if (!success) {
     c.status(411);
-    c.json({ error: "Incorrect input formatting" });
+    return c.json({ error: "Incorrect input formatting" });
   }
   try {
     const user = await prisma.user.create({
@@ -51,7 +51,7 @@ userRouter.post("/signin", async (c) => {
   const { success } = signinInput.safeParse(body);
   if (!success) {
     c.status(411);
-    c.json({ error: "Incorrect input formatting" });
+    return c.json({ error: "Incorrect input formatting" });
   }
   const user = await prisma.user.findUnique({
     where: { email: body.email, password: body.password },

@@ -37,7 +37,7 @@ blogRouter.post("", async (c) => {
   const { success } = createBlogInput.safeParse(body);
   if (!success) {
     c.status(411);
-    c.json({ error: "Incorrect input formatting" });
+    return c.json({ error: "Incorrect input formatting" });
   }
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -61,7 +61,7 @@ blogRouter.put("", async (c) => {
   const { success } = updatedBlogInput.safeParse(body);
   if (!success) {
     c.status(411);
-    c.json({ error: "Incorrect input formatting" });
+    return c.json({ error: "Incorrect input formatting" });
   }
 
   const prisma = new PrismaClient({
