@@ -27,4 +27,15 @@ model Post{
   published Boolean @default(false)
   author User @relation(fields: [authorId], references: [id] )
   authorId String
+  images Image[]
+}
+
+model Image{
+  id String @id @default(cuid())
+  url String
+  key String
+  postId String
+  post Post @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
+
 }
