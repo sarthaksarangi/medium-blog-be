@@ -49,7 +49,7 @@ blogRouter.post("", async (c) => {
     data: {
       title: body.title,
       content: body.content,
-      published: body.published,
+      published: body.published || true,
       authorId: userId,
     },
   });
@@ -93,6 +93,18 @@ blogRouter.get("bulk", async (c) => {
     const blogs = await prisma.post.findMany({
       skip: startIndex,
       take: limit,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        authorId: true,
+        author: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
     console.log("here");
     if (blogs.length === 0) {
@@ -118,6 +130,18 @@ blogRouter.get(":id", async (c) => {
     const blog = await primsa.post.findFirst({
       where: {
         id,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        authorId: true,
+        author: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
     if (!blog) {
