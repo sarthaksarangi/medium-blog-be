@@ -13,15 +13,21 @@ const app = new Hono<{
   };
 }>();
 
+const allowedOrigins = ["http://localhost:5173", "https://localhost:5173"];
+
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://medium-blog-fe.vercel.app",
-      "https://medium-blog-fe-sarthaksarangis-projects.vercel.app",
-      "https://medium-blog-fe-git-main-sarthaksarangis-projects.vercel.app",
-    ],
+    origin: (origin) => {
+      // Check if origin is from Vercel or localhost
+      if (origin?.includes(".vercel.app") || allowedOrigins.includes(origin)) {
+        return origin;
+      }
+      return ""; // Reject non-allowed origins
+    },
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    maxAge: 600,
     credentials: true,
   })
 );
