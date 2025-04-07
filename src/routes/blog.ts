@@ -253,11 +253,18 @@ blogRouter.get("bulk", async (c) => {
             name: true,
           },
         },
+        image: {
+          select: {
+            url: true,
+            key: true,
+            postId: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },
     });
-    console.log("here");
+
     if (blogs.length === 0) {
       c.status(404);
       return c.json({ error: "No blogs found" });
@@ -291,6 +298,13 @@ blogRouter.get(":id", async (c) => {
         author: {
           select: {
             name: true,
+          },
+        },
+        image: {
+          select: {
+            url: true,
+            key: true,
+            postId: true,
           },
         },
         createdAt: true,
