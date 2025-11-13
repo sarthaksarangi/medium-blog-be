@@ -263,6 +263,9 @@ blogRouter.get("bulk", async (c) => {
         createdAt: true,
         updatedAt: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
     if (blogs.length === 0) {
@@ -325,18 +328,23 @@ blogRouter.get(":id", async (c) => {
 
 //Delete Blog Route
 
-blogRouter.delete(":id", async (c) => {
+blogRouter.delete("/:id", async (c) => {
   try {
     const blogId = c.req.param("id");
+
     const prisma = new PrismaClient({
       datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate());
 
+    // Check if blog exists
     const blog = await prisma.post.findUnique({
-      where: {
-        id: blogId,
-      },
+      where: { id: blogId },
     });
+
+    const userId = c.get("userId");
+
+    const originalUser = blog?.authorId === userId;
+
     if (!blog) {
       c.status(404);
       return c.json({
@@ -344,22 +352,45 @@ blogRouter.delete(":id", async (c) => {
         error: "Blog not found!",
       });
     }
-    await prisma.post.delete({
-      where: {
-        id: blogId,
-      },
+
+    if (!originalUser) {
+      c.status(403);
+      return c.json({
+        success: false,
+        error: "Unauthorized! Can not delete blog of another user.",
+      });
+    }
+
+    //  Check if image(s) exist
+    const images = await prisma.image.findMany({
+      where: { postId: blogId },
     });
+
+    //  Delete based on what exists
+    if (images.length > 0) {
+      // Delete both image(s) + blog
+      await prisma.$transaction([
+        prisma.image.deleteMany({
+          where: { postId: blogId },
+        }),
+        prisma.post.delete({
+          where: { id: blogId },
+        }),
+      ]);
+    } else {
+      // Delete only blog
+      await prisma.post.delete({
+        where: { id: blogId },
+      });
+    }
 
     return c.json({
       success: true,
-      message: `Blog post deleted Successfully!`,
+      message: "Blog deleted successfully!",
     });
   } catch (e: any) {
-    console.error(
-      e instanceof Error
-        ? e.message
-        : "Failed to delete Blog. Please Contact System Administrator."
-    );
+    console.error(e);
+
     c.status(500);
     return c.json({
       success: false,
