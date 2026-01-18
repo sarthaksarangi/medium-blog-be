@@ -23,7 +23,11 @@ app.use(
   cors({
     origin: (origin) => {
       // Check if origin is from Vercel or localhost
-      if (origin?.includes(".vercel.app") || allowedOrigins.includes(origin)) {
+      if (
+        origin?.includes(".vercel.app") ||
+        origin?.includes("sarthaksarangi.com") ||
+        allowedOrigins.includes(origin)
+      ) {
         return origin;
       }
       return ""; // Reject non-allowed origins
